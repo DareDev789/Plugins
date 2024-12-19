@@ -24,49 +24,56 @@ add_action('wp', 'csp_remove_similar_products');
 
 function csp_display_same_category_products() {
     function pointInCoordinates($point, $coordinates) {
-        $radius = 35;
-        $radius_in_degrees = $radius / 111;
+        $radius = 35; // Rayon en kilomètres
+        $radius_in_degrees = $radius / 111; // Conversion en degrés
+
+        // Calcul des limites initiales
         $minLat = $coordinates[0][0] - $radius_in_degrees;
         $maxLat = $coordinates[0][0] + $radius_in_degrees;
         $minLon = $coordinates[0][1] - $radius_in_degrees;
         $maxLon = $coordinates[0][1] + $radius_in_degrees;
+
         foreach ($coordinates as $coordinate) {
             $minLat = min($minLat, $coordinate[0] - $radius_in_degrees);
             $maxLat = max($maxLat, $coordinate[0] + $radius_in_degrees);
             $minLon = min($minLon, $coordinate[1] - $radius_in_degrees);
             $maxLon = max($maxLon, $coordinate[1] + $radius_in_degrees);
         }
-        return ($point[0] >= $minLat && $point[0] <= $maxLat &&
-                $point[1] >= $minLon && $point[1] <= $maxLon);
+
+        return (
+            $point[0] >= $minLat && $point[0] <= $maxLat &&
+            $point[1] >= $minLon && $point[1] <= $maxLon
+        );
     }
+
+    // Construction du polygone 
     $polygon = [];
-    
     $villes_coords = get_option('dokan_champs_ordonnance_villes', '');
-    $villes_coords_array = array();
-    
+    $villes_coords_array = [];
+
     if ($villes_coords) {
         $villes_coords_lines = explode("\n", $villes_coords);
         foreach ($villes_coords_lines as $line) {
-            list($ville, $coords) = explode(':', trim($line));
-            $villes_coords_array[trim($ville)] = trim($coords);
+            if (strpos($line, ':') !== false) {
+                list($ville, $coords) = explode(':', trim($line));
+                $villes_coords_array[trim($ville)] = trim($coords);
+            }
         }
     }
-    
+
     foreach ($villes_coords_array as $coords) {
         list($lat, $long) = explode(',', $coords);
-        $polygon[] = [(float)$lat, (float)$long];
+        $polygon[] = [(float) $lat, (float) $long];
     }
 
     if (is_product()) {
         global $product;
         $terms = wp_get_post_terms($product->get_id(), 'product_cat');
-        $pharmacie_product = get_post_meta($product->get_id(), 'pharmacie_produit', true);
-
+        
         if ($terms && !is_wp_error($terms)) {
-            $category_ids = wp_list_pluck($terms, 'term_id'); 
-
-            // Récupérer les IDs des catégories mères
-            $parent_category_ids = array();
+            $category_ids = wp_list_pluck($terms, 'term_id');
+            
+            $parent_category_ids = [];
             foreach ($category_ids as $category_id) {
                 $parent_category_id = get_ancestors($category_id, 'product_cat');
                 if (!empty($parent_category_id)) {
@@ -76,74 +83,72 @@ function csp_display_same_category_products() {
 
             $all_category_ids = array_merge($category_ids, $parent_category_ids);
 
-            $args = array(
+            $geolocation = isset($_COOKIE['geolocation']) ? explode(',', $_COOKIE['geolocation']) : null;
+            
+            $args = [
                 'post_type'      => 'product',
                 'posts_per_page' => 5,
+                'post__not_in'   => [$product->get_id()],
                 'columns'        => 5,
-                'post__not_in'   => array($product->get_id()),
-                'is_carousel' => true,
-                'tax_query'      => array(
-                    array(
+                'is_carousel'    => true,
+                'tax_query'      => [
+                    [
                         'taxonomy' => 'product_cat',
                         'field'    => 'term_id',
-                        'terms'    => $all_category_ids, // Filtrer par catégories et parents
-                    ),
-                ),
-                'meta_query'     => array(),
-            );
-            $geolocation = isset($_COOKIE['geolocation']) ? explode(',', $_COOKIE['geolocation']) : null;
-            if($geolocation){
-                $latitude = $geolocation[0];
-                $longitude = $geolocation[1];
-                $adress_product = $geolocation[2];
-                
-                // Rayon de recherche en kilomètres
-                $radius = 35;
+                        'terms'    => $all_category_ids,
+                    ],
+                ],
+            ];
 
-                // Conversion du rayon en degrés (1° de latitude = environ 111 km)
+            if ($geolocation) {
+                $latitude = (float) $geolocation[0];
+                $longitude = (float) $geolocation[1];
+                $adress_product = isset($geolocation[2]) ? $geolocation[2] : '';
+
+                $radius = 35; // Rayon en kilomètres
                 $radius_in_degrees = $radius / 111;
+
                 $longitude_min = $longitude - $radius_in_degrees;
                 $longitude_max = $longitude + $radius_in_degrees;
                 $latitude_min = $latitude - $radius_in_degrees;
                 $latitude_max = $latitude + $radius_in_degrees;
 
-                $args['meta_query'][] = array(
+                $args['meta_query'] = [
                     'relation' => 'AND',
-                        array(
-                            'key'     => 'dokan_geo_longitude',
-                            'value'   => array($longitude_min, $longitude_max),
-                            'compare' => 'BETWEEN', // Rechercher les produits en dehors de cette plage
-                            'type'    => 'DECIMAL',
-                        ),
-                        array(
-                            'key'     => 'dokan_geo_latitude',
-                            'value'   => array($latitude_min, $latitude_max),
-                            'compare' => 'BETWEEN', // Rechercher les produits en dehors de cette plage
-                            'type'    => 'DECIMAL',
-                        ),
-                );
-            }
+                    [
+                        'key'     => 'dokan_geo_longitude',
+                        'value'   => [$longitude_min, $longitude_max],
+                        'compare' => 'BETWEEN',
+                        'type'    => 'DECIMAL',
+                    ],
+                    [
+                        'key'     => 'dokan_geo_latitude',
+                        'value'   => [$latitude_min, $latitude_max],
+                        'compare' => 'BETWEEN',
+                        'type'    => 'DECIMAL',
+                    ],
+                ];
             }
 
-
-            // Exécuter la requête pour afficher les produits similaires
+            // Requête des produits similaires
             $related_products = new WP_Query($args);
-
             if ($related_products->have_posts()) {
-                echo '<h2 style="font-size: 1.3em !important;">Produits Similaires depuis '.$adress_product.'</h2>';
-                echo '<ul class="products columns-5">'; // Ajout de la classe columns-5 pour afficher 5 produits par ligne
+                echo '<h2 style="font-size: 1.3em !important;">Produits Similaires' . (!empty($adress_product) ? ' depuis ' . esc_html($adress_product) : '') . '</h2>';
+                echo '<ul class="products columns-5">';
 
                 while ($related_products->have_posts()) {
                     $related_products->the_post();
-                    wc_get_template_part('content', 'product'); // Utiliser le template WooCommerce pour afficher les produits
+                    wc_get_template_part('content', 'product');
                 }
 
                 echo '</ul>';
-                wp_reset_postdata(); // Réinitialiser les données de la requête
+                wp_reset_postdata();
             }
         }
+    }
 }
 add_action('woocommerce_after_single_product_summary', 'csp_display_same_category_products', 25);
+
 
 
 function ppc_enqueue_carousel_scripts() {
