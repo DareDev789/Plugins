@@ -1,0 +1,229 @@
+{
+    "routes": [
+        {
+        "from": {
+          "city": "Antananarivo",
+          "coordinates": { "latitude": -18.8792, "longitude": 47.5079 }
+        },
+        "to": {
+          "city": "Diego-suarez",
+          "coordinates": { "latitude": -12.349, "longitude": 49.2917 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1, "price": 5 },
+          { "min_weight": 2, "max_weight": 3, "price": 8.18 },
+          { "min_weight": 4, "max_weight": 5, "price": 10.68 }
+        ]
+      },
+      {
+        "from": {
+            "city": "Ambilobe",
+            "coordinates": { "latitude": -13.1978, "longitude": 49.0506 }
+        },
+        "to": {
+            "city": "Diego-suarez",
+            "coordinates": { "latitude": -12.349, "longitude": 49.2917 }
+        },
+        "reciprocal": true,
+        "prices": [
+            { "min_weight": 0, "max_weight": 1, "price": 1.59 },
+            { "min_weight": 2, "max_weight": 3, "price": 2.5 },
+            { "min_weight": 4, "max_weight": 5, "price": 3.41 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Antananarivo",
+          "coordinates": { "latitude": -18.8792, "longitude": 47.5079 }
+        },
+        "to": {
+          "city": "Ambilobe",
+          "coordinates": { "latitude": -13.1978, "longitude": 49.0506 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1, "price": 3.4 },
+          { "min_weight": 2, "max_weight": 3, "price": 5.68 },
+          { "min_weight": 4, "max_weight": 5, "price": 7.27 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Tuléar",
+          "coordinates": { "latitude": -23.3500, "longitude": 43.6667 }
+        },
+        "to": {
+          "city": "Antananarivo",
+          "coordinates": { "latitude": -18.8792, "longitude": 47.5079 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1, "price": 5 },
+          { "min_weight": 2, "max_weight": 3, "price": 8.18 },
+          { "min_weight": 4, "max_weight": 5, "price": 10.68 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Antananarivo",
+          "coordinates": { "latitude": -18.8792, "longitude": 47.5079 }
+        },
+        "to": {
+          "city": "Tamatave",
+          "coordinates": { "latitude": -18.1492, "longitude": 49.4023 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1, "price": 3.18 },
+          { "min_weight": 2, "max_weight": 3, "price": 5 },
+          { "min_weight": 4, "max_weight": 5, "price": 6.59 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Antananarivo",
+          "coordinates": { "latitude": -18.8792, "longitude": 47.5079 }
+        },
+        "to": {
+          "city": "Fianarantsoa",
+          "coordinates": { "latitude": -21.4527, "longitude": 47.0857 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1, "price": 3.18 },
+          { "min_weight": 2, "max_weight": 3, "price": 5 },
+          { "min_weight": 4, "max_weight": 5, "price": 6.59 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Antananarivo",
+          "coordinates": { "latitude": -18.8792, "longitude": 47.5079 }
+        },
+        "to": {
+          "city": "Antsirabe",
+          "coordinates": { "latitude": -19.8659, "longitude": 47.0335 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1, "price": 1.59 },
+          { "min_weight": 2, "max_weight": 3, "price": 2.5 },
+          { "min_weight": 4, "max_weight": 5, "price": 3.41 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Antananarivo",
+          "coordinates": { "latitude": -18.8792, "longitude": 47.5079 }
+        },
+        "to": {
+          "city": "Majunga",
+          "coordinates": { "latitude": -15.7164, "longitude": 46.3167 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1, "price": 1.59 },
+          { "min_weight": 2, "max_weight": 3, "price": 2.5 },
+          { "min_weight": 4, "max_weight": 5, "price": 3.18 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Diego-suarez",
+          "coordinates": { "latitude": -12.349, "longitude": 49.2917 }
+        },
+        "to": {
+          "city": "Majunga",
+          "coordinates": { "latitude": -15.7164, "longitude": 46.3167 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1, "price": 5 },
+          { "min_weight": 2, "max_weight": 3, "price": 8.18 },
+          { "min_weight": 4, "max_weight": 5, "price": 10.68 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Antananarivo",
+          "coordinates": { "latitude": -18.8792, "longitude": 47.5079 }
+        },
+        "to": {
+          "city": "Morondava",
+          "coordinates": { "latitude": -20.2833, "longitude": 44.2833 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1, "price": 3.86 },
+          { "min_weight": 2, "max_weight": 3, "price": 6.14 },
+          { "min_weight": 4, "max_weight": 5, "price": 7.95 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Diego-suarez",
+          "coordinates": { "latitude": -12.349, "longitude": 49.2917 }
+        },
+        "to": {
+          "city": "Sambava",
+          "coordinates": { "latitude": -14.2667, "longitude": 50.1667 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1.5, "price": 2.72 },
+          { "min_weight": 1.5, "max_weight": 5, "price": 6.81 },
+          { "min_weight": 5, "max_weight": 10, "price": 10.22 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Diego-suarez",
+          "coordinates": { "latitude": -12.349, "longitude": 49.2917 }
+        },
+        "to": {
+          "city": "Vohémar",
+          "coordinates": { "latitude": -13.3500, "longitude": 50.0000 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1.5, "price": 2.27 },
+          { "min_weight": 1.5, "max_weight": 5, "price": 3.41 },
+          { "min_weight": 5, "max_weight": 10, "price": 6.81 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Antalaha ",
+          "coordinates": { "latitude": -14.8983, "longitude": 50.2786 }
+        },
+        "to": {
+          "city": "Sambava",
+          "coordinates": { "latitude": -14.2667, "longitude": 50.1667 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1.5, "price": 1.59 },
+          { "min_weight": 1.5, "max_weight": 5, "price": 2.27 },
+          { "min_weight": 5, "max_weight": 10, "price": 10.22 }
+        ]
+      },
+      {
+        "from": {
+          "city": "Andapa ",
+          "coordinates": { "latitude": -13.4667, "longitude": 49.7833 }
+        },
+        "to": {
+          "city": "Sambava",
+          "coordinates": { "latitude": -14.2667, "longitude": 50.1667 }
+        },
+        "reciprocal": true,
+        "prices": [
+          { "min_weight": 0, "max_weight": 1.5, "price": 2.27 },
+          { "min_weight": 1.5, "max_weight": 5, "price": 3.40 },
+          { "min_weight": 5, "max_weight": 10, "price": 6.80 }
+        ]
+      }
+    ]
+  }
+  
