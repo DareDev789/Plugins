@@ -10,12 +10,15 @@
           "coordinates": { "latitude": -12.349, "longitude": 49.2917 }
         },
         "reciprocal": true,
+        "defaut_price" : 20,
         "prices": [
           { "min_weight": 0, "max_weight": 1, "price": 5 },
           { "min_weight": 2, "max_weight": 3, "price": 8.18 },
           { "min_weight": 4, "max_weight": 5, "price": 10.68 }
         ]
       },
+
+      
       {
         "from": {
             "city": "Ambilobe",
@@ -26,6 +29,7 @@
             "coordinates": { "latitude": -12.349, "longitude": 49.2917 }
         },
         "reciprocal": true,
+        "defaut_price" : 5,
         "prices": [
             { "min_weight": 0, "max_weight": 1, "price": 1.59 },
             { "min_weight": 2, "max_weight": 3, "price": 2.5 },
@@ -42,6 +46,7 @@
           "coordinates": { "latitude": -13.1978, "longitude": 49.0506 }
         },
         "reciprocal": true,
+        "defaut_price" : 13,
         "prices": [
           { "min_weight": 0, "max_weight": 1, "price": 3.4 },
           { "min_weight": 2, "max_weight": 3, "price": 5.68 },
@@ -58,6 +63,7 @@
           "coordinates": { "latitude": -18.8792, "longitude": 47.5079 }
         },
         "reciprocal": true,
+        "defaut_price" : 17,
         "prices": [
           { "min_weight": 0, "max_weight": 1, "price": 5 },
           { "min_weight": 2, "max_weight": 3, "price": 8.18 },
@@ -74,6 +80,7 @@
           "coordinates": { "latitude": -18.1492, "longitude": 49.4023 }
         },
         "reciprocal": true,
+        "defaut_price" : 8,
         "prices": [
           { "min_weight": 0, "max_weight": 1, "price": 3.18 },
           { "min_weight": 2, "max_weight": 3, "price": 5 },
@@ -90,6 +97,7 @@
           "coordinates": { "latitude": -21.4527, "longitude": 47.0857 }
         },
         "reciprocal": true,
+        "defaut_price" : 10,
         "prices": [
           { "min_weight": 0, "max_weight": 1, "price": 3.18 },
           { "min_weight": 2, "max_weight": 3, "price": 5 },
@@ -106,6 +114,7 @@
           "coordinates": { "latitude": -19.8659, "longitude": 47.0335 }
         },
         "reciprocal": true,
+        "defaut_price" : 6,
         "prices": [
           { "min_weight": 0, "max_weight": 1, "price": 1.59 },
           { "min_weight": 2, "max_weight": 3, "price": 2.5 },
@@ -122,6 +131,7 @@
           "coordinates": { "latitude": -15.7164, "longitude": 46.3167 }
         },
         "reciprocal": true,
+        "defaut_price" : 7,
         "prices": [
           { "min_weight": 0, "max_weight": 1, "price": 1.59 },
           { "min_weight": 2, "max_weight": 3, "price": 2.5 },
@@ -138,6 +148,7 @@
           "coordinates": { "latitude": -15.7164, "longitude": 46.3167 }
         },
         "reciprocal": true,
+        "defaut_price" : 18,
         "prices": [
           { "min_weight": 0, "max_weight": 1, "price": 5 },
           { "min_weight": 2, "max_weight": 3, "price": 8.18 },
@@ -154,6 +165,7 @@
           "coordinates": { "latitude": -20.2833, "longitude": 44.2833 }
         },
         "reciprocal": true,
+        "defaut_price" : 13,
         "prices": [
           { "min_weight": 0, "max_weight": 1, "price": 3.86 },
           { "min_weight": 2, "max_weight": 3, "price": 6.14 },
@@ -170,6 +182,7 @@
           "coordinates": { "latitude": -14.2667, "longitude": 50.1667 }
         },
         "reciprocal": true,
+        "defaut_price" : 17,
         "prices": [
           { "min_weight": 0, "max_weight": 1.5, "price": 2.72 },
           { "min_weight": 1.5, "max_weight": 5, "price": 6.81 },
@@ -186,6 +199,7 @@
           "coordinates": { "latitude": -13.3500, "longitude": 50.0000 }
         },
         "reciprocal": true,
+        "defaut_price" : 10,
         "prices": [
           { "min_weight": 0, "max_weight": 1.5, "price": 2.27 },
           { "min_weight": 1.5, "max_weight": 5, "price": 3.41 },
@@ -202,6 +216,7 @@
           "coordinates": { "latitude": -14.2667, "longitude": 50.1667 }
         },
         "reciprocal": true,
+        "defaut_price" : 18,
         "prices": [
           { "min_weight": 0, "max_weight": 1.5, "price": 1.59 },
           { "min_weight": 1.5, "max_weight": 5, "price": 2.27 },
@@ -218,6 +233,7 @@
           "coordinates": { "latitude": -14.2667, "longitude": 50.1667 }
         },
         "reciprocal": true,
+        "defaut_price" : 11,
         "prices": [
           { "min_weight": 0, "max_weight": 1.5, "price": 2.27 },
           { "min_weight": 1.5, "max_weight": 5, "price": 3.40 },

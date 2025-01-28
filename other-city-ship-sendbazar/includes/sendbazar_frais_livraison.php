@@ -159,19 +159,19 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                             $reciprocal_match = $reciprocal && $this->coordinates_match($from_lat, $from_lon, $to_lat, $to_lon, $route_to, $route_from);
                 
                             if ($direct_match || $reciprocal_match) {
-                                foreach ($route['prices'] as $price_range) {
+                                $prix_total = null;
+                            
+                                foreach ($route['prices'] as $index => $price_range) {
                                     if ($total_weight >= $price_range['min_weight'] && $total_weight <= $price_range['max_weight']) {
                                         $prix_total = $price_range['price'];
-                                    }
-
-                                    // Si le poids est supérieur à la plage maximale de la dernière plage définie
-                                    if ($index == count($route['prices']) - 1 && $total_weight > $price_range['max_weight']) {
-                                        $base_cost_per_km = 0.0031;
-                                        $additional_cost_per_kg = 1.14;
-                                        $prix_total = ($distance * $base_cost_per_km) + ($additional_cost_per_kg * sqrt($total_weight));
+                                        break; 
                                     }
                                 }
-                            }
+                            
+                                if ($prix_total === null) {
+                                    $prix_total = $route['defaut_price'];
+                                }
+                            }                            
                             $base_prices = [
                                 15 => 1.6,
                                 65 => 3.2,

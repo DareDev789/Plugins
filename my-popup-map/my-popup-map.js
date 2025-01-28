@@ -203,13 +203,19 @@ function initCustomMap(products) {
             const villeText = document.getElementById('ville_pays_dest');
             if (villeContainer && villeText) {
                 villeContainer.classList.add('ville_pays_dest1');
+                villeText.style = "padding: 0px; display: flex"
                 villeText.innerHTML = `
-                    <i class="fa fa-map-marker" aria-hidden="true"></i> 
-                    Ville de livraison : ${allAddressCookie} (jusqu'à 35Km) 
-                    &nbsp;&nbsp;
-                    <a style="color: #0ce4e4; font-size: 12px;" href="#" onclick="resetMap('geolocation', '')">
-                        <i class="fa fa-times"></i>
-                    </a>`;
+                    <p style="text-wrap: nowrap; padding-left: 2px; padding : 0px; font-size: 1.1em;">
+                        <i class="fa fa-map-marker" aria-hidden="true"></i> 
+                        Ville de livraison : ${allAddressCookie} (jusqu'à 35Km)
+                    </p>
+                    <div style="position: absolute; right: 10px; top: 0px;">
+                        <a style="color: #0ce4e4; font-size: 14px;" href="#" onclick="resetMap('geolocation', '')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
+                `;
+
             } else {
                 villeContainer?.classList.remove('ville_pays_dest1');
             }
@@ -254,19 +260,15 @@ function initCustomMap(products) {
      * Initialisation
      */
     document.addEventListener('DOMContentLoaded', () => {
-        // Initialiser les liens avec l'action pour ouvrir la popup
         document.querySelectorAll('a[href="#map_popup"]').forEach(link => {
             link.addEventListener('click', openMap);
         });
 
-        // Ajouter du texte personnalisé au menu
         addCustomTextBelowMenu();
 
-        // Vérifier les URLs au chargement
         verifyUrl();
     });
 
-    // Expose les fonctions nécessaires au global
     window.openMap = openMap;
     window.closeMap = closeMap;
     window.toggleMap = toggleMap;
@@ -274,7 +276,6 @@ function initCustomMap(products) {
 })();
 
 jQuery(document).ready(function($) {
-    // Fonction pour obtenir un cookie par son nom
     function getCookie(name) {
         let cookieArr = document.cookie.split("; ");
         for (let i = 0; i < cookieArr.length; i++) {
@@ -304,7 +305,6 @@ jQuery(document).ready(function($) {
         $('#Change_Cat').fadeOut();
     }
 
-    // Ouvre le popup lorsqu'on clique sur "Change_Cat"
     $('#Change_Cat').click(function() {
         if(!geolocation){
             openMap();
@@ -337,7 +337,6 @@ jQuery(document).ready(function($) {
         }
     });
 
-    // Fermer le popup en cliquant à l'extérieur de la fenêtre modale
     $('#popup-categories').click(function(event) {
         close_popup_cat();
         open_Change_Cat();
@@ -355,13 +354,11 @@ function getCookie1(name) {
     for(let i = 0; i < cookieArr.length; i++) {
         let cookie = cookieArr[i].trim();
 
-        // Vérifie si ce cookie correspond à celui que tu cherches
         if (cookie.indexOf(name + "=") === 0) {
             return cookie.substring((name + "=").length, cookie.length);
         }
     }
 
-    // Retourne null si le cookie n'existe pas
     return null;
 }
 
@@ -370,7 +367,6 @@ function deleteCookie(name) {
 }
 
 function redirectOrReload() {
-    // Obtenir l'URL actuelle
     const currentURL = window.location.pathname;
     let directionValue = getCookie1("direction");
 
@@ -383,17 +379,14 @@ function redirectOrReload() {
             currentURL.startsWith('/produits/') ||
             currentURL.startsWith('/produit/')
         ) {
-            // Si l'utilisateur est déjà sur l'une des pages, recharge la page
             window.location.reload();
         } else {
-            // Sinon, redirige vers /produits/
             window.location.href = '/produits/';
         }
     }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Sélectionnez tous les liens sur la page
     const links = document.querySelectorAll('a');
     
     links.forEach(link => {
@@ -405,7 +398,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const targetUrl2 = window.location.origin + '/categorie-produit/';
             const targetUrl3 = window.location.origin + '/pharmacies/';
             
-            // Vérifiez si l'URL cliquée commence par les URLs cibles
             if (clickedUrl.startsWith(targetUrl) || clickedUrl.startsWith(targetUrl1) || clickedUrl.startsWith(targetUrl2) || clickedUrl.startsWith(targetUrl3)) {
                 if (!geolocation) {
                     event.preventDefault();
@@ -514,7 +506,6 @@ function addressClickHandler(addressMarker, addressInfoWindow, address, products
     for (let i = 0; i < infoWindows.length; i++) {
         infoWindows[i].close();
     }
-    //addressInfoWindow.open(map, addressMarker);
     map.setZoom(12);
     map.setCenter(addressMarker.getPosition());
 
