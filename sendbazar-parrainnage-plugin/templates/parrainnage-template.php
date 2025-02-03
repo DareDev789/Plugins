@@ -11,10 +11,17 @@ $parrainage_code = get_user_meta($current_user->ID, 'parrainage_code', true);
 $parrainage_credits = get_user_meta($current_user->ID, 'parrainage_credits', true);
 
 if (!$parrainage_code) {
-    // Générer un code de parrainage unique si inexistant
-    $parrainage_code = strtoupper(wp_generate_password(8, false, false));
+    $nom_sans_espace = strtoupper(preg_replace('/\s+/', '', $current_user->user_login));
+    $prefix = substr($nom_sans_espace, 0, 6);
+
+    $suffix = strtoupper(wp_generate_password(4, false, false));
+
+    // Construire le code de parrainage final
+    $parrainage_code = $prefix . '-' . $suffix;
+
     update_user_meta($current_user->ID, 'parrainage_code', $parrainage_code);
 }
+
 
 if (!$parrainage_credits) {
     $parrainage_credits = 0;
@@ -32,6 +39,7 @@ $orders = get_posts($args);
 
 <div class="parrainage-container">
     <h2>Mon Parrainage</h2>
+    <button id="generate-download-image-btn">Générer et Télécharger l’Image</button>
     <p>Partagez ce code avec vos proches pour leur offrir 5€ de réduction :</p>
     <div class="parrainage-code">
         Code : <strong id="parrainage-code-display"><?php echo esc_html($parrainage_code); ?></strong>
@@ -132,6 +140,7 @@ $orders = get_posts($args);
                 if (data.success) {
                     document.getElementById("parrainage-code-display").innerText = newCode;
                     document.getElementById("edit-code-section").style.display = "none";
+                    document.getElementById("edit-code-btn").innerText = "Modifier";
                 }
             })
             .catch(error => console.error("Erreur :", error))
@@ -161,6 +170,40 @@ $orders = get_posts($args);
                 NProgress.done();
             });
     });
+
+    document.getElementById("generate-download-image-btn").addEventListener("click", function () {
+        let code = document.getElementById("parrainage-code-display").innerText;
+
+        NProgress.start();
+        fetch("<?php echo admin_url('admin-ajax.php'); ?>", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `action=download_parrainage_image&parrainage_code=${encodeURIComponent(code)}&nonce=<?php echo wp_create_nonce('download_parrainage_nonce'); ?>`
+        })
+            .then(response => {
+                console.log(response); // Afficher la réponse brute dans la console
+                return response.json(); // Convertir en JSON
+            })
+            .then(data => {
+                console.log(data); // Vérifier la réponse JSON
+                if (data.success) {
+                    let link = document.createElement("a");
+                    link.href = data.image_url;
+                    link.download = "parrainage-" + code + ".jpg";
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    alert("Erreur : " + data.message);
+                }
+            })
+            .catch(error => console.error("Erreur :", error))
+            .finally(() => {
+                NProgress.done();
+            });
+    });
+
+
 </script>
 
 

@@ -449,46 +449,65 @@ add_action('admin_post_mark_as_paid', 'mark_parrainage_as_paid');
 
 
 
-add_action('wp_ajax_request_parrainage_payment', 'request_parrainage_payment');
-add_action('wp_ajax_nopriv_request_parrainage_payment', '__return_false');
+add_action('wp_ajax_download_parrainage_image', 'download_parrainage_image');
+add_action('wp_ajax_nopriv_download_parrainage_image', 'download_parrainage_image');
 
-function request_parrainage_payment()
-{
-    // Vérifie la requête et la nonce
-    check_ajax_referer('parrainage_payment_nonce', 'nonce');
-
-    if (!is_user_logged_in()) {
-        wp_send_json_error(['message' => 'Vous devez être connecté.']);
+function download_parrainage_image() {
+    // Vérifier le nonce pour éviter les attaques CSRF
+    if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'download_parrainage_nonce')) {
+        wp_send_json_error(['message' => 'Nonce invalide.']);
+        wp_die();
     }
 
-    $current_user = wp_get_current_user();
-    $user_id = $current_user->ID;
-
-    // Vérifie si l'utilisateur a un crédit suffisant (> 0)
-    $parrainage_credits = get_user_meta($user_id, 'parrainage_credits', true);
-    if ($parrainage_credits <= 0) {
-        wp_send_json_error(['message' => 'Vous n\'avez pas assez de crédits pour demander un paiement.']);
+    if (!isset($_POST['parrainage_code'])) {
+        wp_send_json_error(['message' => 'Code de parrainage manquant.']);
+        wp_die();
     }
 
-    // Vérifie s'il n'a pas déjà une demande en cours
-    $demande_paiement = get_user_meta($user_id, 'demande_paiement', true);
-    if ($demande_paiement) {
-        wp_send_json_error(['message' => 'Vous avez déjà une demande de paiement en cours.']);
+    $parrainage_code = sanitize_text_field($_POST['parrainage_code']);
+
+    // Chemins des fichiers (dans le plugin)
+    $background_path = plugin_dir_path(__FILE__) . 'assets/parrainage-bg.jpg';
+    $font_path = plugin_dir_path(__FILE__) . 'assets/ARIAL.TTF';
+
+    // Vérification des fichiers
+    if (!file_exists($background_path)) {
+        wp_send_json_error(['message' => "L'image de fond est introuvable dans le plugin !"]);
+        wp_die();
     }
 
-    // Marque la demande de paiement
-    update_user_meta($user_id, 'demande_paiement', 'en_attente');
+    if (!file_exists($font_path)) {
+        wp_send_json_error(['message' => "Le fichier de police est introuvable dans le plugin !"]);
+        wp_die();
+    }
 
-    // Envoie un email à l'administrateur
-    $admin_email = get_option('admin_email');
-    $subject = "Nouvelle demande de paiement - Parrainage";
-    $message = "L'utilisateur " . $current_user->display_name . " (ID: $user_id) a demandé un paiement.\n\n";
-    $message .= "Crédits actuels : " . number_format($parrainage_credits, 2) . " €\n\n";
-    $message .= "Merci de traiter cette demande dans les plus brefs délais.";
-    wp_mail($admin_email, $subject, $message);
+    // Déterminer le dossier de destination
+    $upload_dir = wp_upload_dir();
+    if (empty($upload_dir['path']) || empty($upload_dir['url'])) {
+        wp_send_json_error(['message' => "Erreur lors de la récupération du dossier d'upload."]);
+        wp_die();
+    }
 
-    wp_send_json_success(['message' => 'Votre demande de paiement a été envoyée avec succès.']);
+    $output_filename = 'parrainage-' . $parrainage_code . '.jpg';
+    $output_path = $upload_dir['path'] . '/' . $output_filename;
+    $output_url = $upload_dir['url'] . '/' . $output_filename;
+
+    // Créer l'image
+    $image = imagecreatefromjpeg($background_path);
+    $white = imagecolorallocate($image, 255, 255, 255);
+
+    // Ajouter le texte
+    imagettftext($image, 40, 0, 50, 200, $white, $font_path, $parrainage_code);
+
+    // Sauvegarder l'image
+    imagejpeg($image, $output_path, 100);
+    imagedestroy($image);
+
+    // Retourner l'URL de l'image
+    wp_send_json_success(['image_url' => $output_url]);
+    wp_die();
 }
+
 
 
 
