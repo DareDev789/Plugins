@@ -184,7 +184,6 @@ function initCustomMap(products) {
     function resetMap(name, lien) {
         document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         deleteCookie("categorie_select");
-        NProgress.start();
         fetch(window.location.origin + '/wp-content/plugins/my-popup-map/empty_cart.php', { method: 'POST' })
             .then(response => response.text())
             .then(() => {
@@ -192,9 +191,6 @@ function initCustomMap(products) {
             })
             .catch(error => {
                 console.error('Erreur lors de la vidange du panier:', error);
-            })
-            .finally(() => {
-                NProgress.done();
             });
     }
 
@@ -549,7 +545,6 @@ function AllowGeolocation(city, latitude, longitude){
         }).then((result) => {
             if (result.isConfirmed) {
                 deleteCookie("categorie_select");
-                NProgress.start();
                 fetch(window.location.origin + '/wp-content/plugins/my-popup-map/empty_cart.php', { method: 'POST' })
                     .then(response => response.text())
                     .then(() => {
@@ -559,9 +554,6 @@ function AllowGeolocation(city, latitude, longitude){
                     .catch(error => {
                         console.error('Erreur lors de la vidange du panier:', error);
                         openMap();
-                    })
-                    .finally(() => {
-                        NProgress.done();
                     });
             }else{
                 openMap();

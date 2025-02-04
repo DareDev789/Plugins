@@ -39,16 +39,16 @@ $orders = get_posts($args);
 
 <div class="parrainage-container">
     <h2>Mon Parrainage</h2>
-    <button id="generate-download-image-btn">Générer et Télécharger l’Image</button>
+    <!-- <button id="generate-download-image-btn">Générer et Télécharger l’Image</button> -->
     <p>Partagez ce code avec vos proches pour leur offrir 5€ de réduction :</p>
     <div class="parrainage-code">
         Code : <strong id="parrainage-code-display"><?php echo esc_html($parrainage_code); ?></strong>
     </div>
 
-    <button id="edit-code-btn">Modifier</button>
+    <button id="edit-code-btn" style="background : #F5848C">Modifier</button>
     <div id="edit-code-section" style="display: none; margin-top: 10px;">
         <input type="text" id="new-parrainage-code" placeholder="Nouveau code..." />
-        <button id="save-code-btn">Enregistrer</button>
+        <button class="button" style="background : #F5848C; width: 100%" id="save-code-btn">Enregistrer</button>
         <p id="code-message"></p>
     </div>
 
@@ -61,7 +61,7 @@ $orders = get_posts($args);
         if ($demande_paiement === 'en_attente'): ?>
             <p style="color: orange;">Votre demande de paiement est en attente de validation.</p>
         <?php elseif ($parrainage_credits > 0): ?>
-            <button id="request-payment-btn">Demander un paiement</button>
+            <button class="button" style="background : #F5848C" id="request-payment-btn">Demander un paiement</button>
         <?php endif; ?>
 
     </div>
@@ -117,9 +117,11 @@ $orders = get_posts($args);
         if (editSection.style.display === "none") {
             editSection.style.display = "block";
             editButton.innerText = "Annuler";
+            editButton.style = "background : red";
         } else {
             editSection.style.display = "none";
             editButton.innerText = "Modifier";
+            editButton.style = "background : #F5848C";
         }
     });
 
@@ -141,6 +143,7 @@ $orders = get_posts($args);
                     document.getElementById("parrainage-code-display").innerText = newCode;
                     document.getElementById("edit-code-section").style.display = "none";
                     document.getElementById("edit-code-btn").innerText = "Modifier";
+                    document.getElementById("edit-code-btn").style = "background : #F5848C";
                 }
             })
             .catch(error => console.error("Erreur :", error))

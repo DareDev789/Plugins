@@ -411,27 +411,25 @@ function custom_pre_get_posts_query($query)
 }
 add_action('pre_get_posts', 'custom_pre_get_posts_query', 99);
 
-add_action('wp', function () {
+add_action('woocommerce_add_to_cart', function () {
+    // Vérifier si le cookie 'geolocation' est défini
     if (!isset($_COOKIE['geolocation'])) {
         return;
     }
 
+    // Récupérer la ville depuis le cookie
     list($latitude, $longitude, $city) = explode(',', sanitize_text_field($_COOKIE['geolocation']));
 
-    $city = strtolower(trim($city));
 
-    $city = stripslashes($city);
-
+    // Liste des villes disponibles
     $villes = [
         ['nom' => 'Antananarivo', 'codePostal' => '101', 'region' => 'Analamanga', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Antananarivo Madagascar', 'codePostal' => '101', 'region' => 'Analamanga', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Tananarive', 'codePostal' => '101', 'region' => 'Analamanga', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Diego Suarez', 'codePostal' => '201', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Diego-Suarez', 'codePostal' => '201', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Ambilobe', 'codePostal' => '204', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Antsiranana', 'codePostal' => '201', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Ambanja', 'codePostal' => '203', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'District d\'Ambanja', 'codePostal' => '203', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Nosy Be', 'codePostal' => '207', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Hell Ville', 'codePostal' => '207', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Andapa', 'codePostal' => '205', 'region' => 'SAVA', 'pays' => 'MG', 'paysName' => 'Madagascar'],
@@ -454,15 +452,12 @@ add_action('wp', function () {
         ['nom' => 'Morombe', 'codePostal' => '618', 'region' => 'Atsimo-Andrefana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Mananjary', 'codePostal' => '317', 'region' => 'Vatovavy-Fitovinany', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Soavinandriana', 'codePostal' => '119', 'region' => 'Itasy', 'pays' => 'MG'],
-        ['nom' => 'Tsiroanomandidy', 'codePostal' => '118', 'region' => 'Bongolava', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Tôlanaro', 'codePostal' => '614', 'region' => 'Anosy', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Mahanoro', 'codePostal' => '510', 'region' => 'Atsinanana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Fenoarivo Antsinanana', 'codePostal' => '509', 'region' => 'Analanjirofo', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Fenoarivo Antsinanana', 'codePostal' => '509', 'region' => 'Analanjirofo', 'pays' => 'MG', 'paysName' => 'Madagascar']
+        ['nom' => 'Tsiroanomandidy', 'codePostal' => '118', 'region' => 'Bongolava', 'pays' => 'MG', 'paysName' => 'Madagascar']
     ];
 
-
-    $ville = array_values(array_filter($villes, function ($v) use ($city) { return stripos($v['nom'], $city) !== false; }));
+    $ville = array_values(array_filter($villes, function ($v) use ($city) {
+        return stripos($v['nom'], $city) !== false;
+    }));
 
     if (!empty($ville)) {
         $ville = $ville[0];
@@ -474,47 +469,6 @@ add_action('wp', function () {
         $customer->set_shipping_state($ville['region']);
         $customer->set_shipping_country($ville['pays']);
         $customer->save();
-    }else{
-        $customer = WC()->customer;
-
-        $customer->set_shipping_city($ville['']);
-        $customer->set_shipping_postcode($ville['']);
-        $customer->set_shipping_state($ville['']);
-        $customer->set_shipping_country($ville['']);
-        $customer->save();
+        
     }
 }, 10, 0);
-
-add_action('wp_footer', function () {
-    $customer = WC()->customer;
-    $shipping_city = $customer->get_shipping_city();
-
-    if (!empty($shipping_city)) {
-        ?>
-        <script>
-            function disableShippingButton() {
-                var shippingButton = jQuery('.shipping-calculator-button');
-
-                shippingButton.on('click', function (e) {
-                    e.preventDefault();
-                });
-
-                shippingButton.css({
-                    'pointer-events': 'none',
-                    'opacity': '0.5',
-                    'cursor': 'not-allowed'
-                });
-            }
-
-            jQuery(document).ready(function ($) {
-                disableShippingButton();
-            });
-
-            jQuery(document.body).on('updated_cart_totals', function () {
-                disableShippingButton();
-            });
-        </script>
-        <?php
-    }
-}, 20);
-

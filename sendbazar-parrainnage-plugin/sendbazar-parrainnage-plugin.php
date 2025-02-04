@@ -76,12 +76,13 @@ function sendbazar_add_referral_code_cart()
         <label for="parrainage_code">Code de Parrainage :</label>
         <input type="text" id="parrainage_code" name="parrainage_code" placeholder="Entrez le code ici..."
             value="<?php echo esc_attr(WC()->session->get('parrainage_code', '')); ?>" />
-        <button type="button" id="apply_referral_code">Appliquer</button>
+        <button class="button" onclick="attachReferralCodeButtonEvent()" style="width : 100%; background : #F5848C" type="button"
+            id="apply_referral_code">Appliquer</button>
         <p id="sendbazar_referral_message"></p>
     </div>
 
     <script>
-        document.getElementById("apply_referral_code").addEventListener("click", function () {
+        function attachReferralCodeButtonEvent() {
             let referralCode = document.getElementById("parrainage_code").value;
             let messageBox = document.getElementById("sendbazar_referral_message");
             NProgress.start();
@@ -104,7 +105,7 @@ function sendbazar_add_referral_code_cart()
                     }
                     NProgress.done();
                 });
-        });
+        }
     </script>
     <?php
 }
@@ -170,28 +171,46 @@ function sendbazar_apply_referral_discount($cart)
         return;
     }
 
-    // Vérifier si un code de parrainage est enregistré en session
     $referral_code = WC()->session->get('parrainage_code');
+
     if (!empty($referral_code)) {
         $users = get_users(['meta_key' => 'parrainage_code', 'meta_value' => $referral_code]);
+
         if (!empty($users)) {
-            $cart->add_fee('Réduction Parrainage', -5);
+            if ($cart->subtotal_ex_tax >= 65) {
+                $cart->add_fee('Réduction Parrainage', -5);
+            } else {
+                WC()->session->__unset('parrainage_code');
+            }
         }
     }
 }
 add_action('woocommerce_cart_calculate_fees', 'sendbazar_apply_referral_discount');
 
 
+
+
 // Afficher un message si une réduction de parrainage est appliquée
 function sendbazar_display_referral_discount_message()
 {
     $referral_code = WC()->session->get('parrainage_code');
+
     if (!empty($referral_code)) {
-        echo '<p style="color: green; font-weight: bold;">🎉 Félicitations ! Vous avez bénéficié d’une réduction de 5€ grâce au code parrainage.</p>';
+        $cart = WC()->cart;
+
+        // Vérifier si le total du panier est supérieur ou égal à 65€
+        if ($cart->subtotal_ex_tax >= 65) {
+            echo '<p style="color: green; font-weight: bold;">🎉 Félicitations ! Vous avez bénéficié d’une réduction de 5€ grâce au code parrainage.</p>';
+        } else {
+            // Supprimer le code de parrainage de la session si le total est inférieur à 65€
+            WC()->session->__unset('parrainage_code');
+        }
     }
 }
+
 add_action('woocommerce_cart_totals_before_order_total', 'sendbazar_display_referral_discount_message');
 add_action('woocommerce_review_order_before_order_total', 'sendbazar_display_referral_discount_message');
+
 
 // Ajouter le code de parrainage et la remise aux détails de la commande
 function sendbazar_save_referral_discount_to_order($order_id)
@@ -452,7 +471,8 @@ add_action('admin_post_mark_as_paid', 'mark_parrainage_as_paid');
 add_action('wp_ajax_download_parrainage_image', 'download_parrainage_image');
 add_action('wp_ajax_nopriv_download_parrainage_image', 'download_parrainage_image');
 
-function download_parrainage_image() {
+function download_parrainage_image()
+{
     // Vérifier le nonce pour éviter les attaques CSRF
     if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'download_parrainage_nonce')) {
         wp_send_json_error(['message' => 'Nonce invalide.']);

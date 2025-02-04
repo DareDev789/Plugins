@@ -25,9 +25,6 @@ function verrouillerChampsLivraison() {
         shipCheckbox.checked = true;
         shipCheckbox.disabled = true;
     }
-
-    document.getElementById('createaccount').setAttribute('checked', true);
-    document.getElementById('createaccount').disabled = true;
 }
 
 document.addEventListener('DOMContentLoaded', verrouillerChampsLivraison);

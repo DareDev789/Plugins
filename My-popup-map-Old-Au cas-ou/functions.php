@@ -639,15 +639,6 @@ function my_popup_map_menu() {
 }
 add_action('admin_menu', 'my_popup_map_menu');
 
-function nprogress_enqueue_scripts2()
-{
-    wp_enqueue_script('nprogress-js', 'https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js', [], '0.2.0', true);
-    wp_enqueue_style('nprogress-css', 'https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css', [], '0.2.0');
-}
-add_action('wp_enqueue_scripts', 'nprogress_enqueue_scripts2');
-
-
-
 function modifier_textes_woocommerce($translated_text, $text, $domain) {
     if ($domain === 'woocommerce') {
         $remplacements = [
