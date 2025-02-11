@@ -411,110 +411,84 @@ function custom_pre_get_posts_query($query)
 }
 add_action('pre_get_posts', 'custom_pre_get_posts_query', 99);
 
-add_action('wp', function () {
-    if (!isset($_COOKIE['geolocation'])) {
-        return;
+// Cacher les champs de facturation sur la page checkout
+// add_filter('woocommerce_checkout_fields', function ($fields) {
+//     if (is_checkout()) {
+//         // Supprime les champs de facturation
+//         unset($fields['billing']);
+//     }
+//     return $fields;
+// });
+
+// Copier automatiquement l'adresse de livraison dans l'adresse de facturation
+add_action('woocommerce_checkout_update_order_meta', function ($order_id) {
+    $order = wc_get_order($order_id);
+
+    // Récupérer les infos de livraison
+    $shipping_first_name = $order->get_shipping_first_name();
+    $shipping_last_name  = $order->get_shipping_last_name();
+    $shipping_address_1  = $order->get_shipping_address_1();
+    $shipping_address_2  = $order->get_shipping_address_2();
+    $shipping_city       = $order->get_shipping_city();
+    $shipping_postcode   = $order->get_shipping_postcode();
+    $shipping_country    = $order->get_shipping_country();
+    $shipping_state      = $order->get_shipping_state();
+    $shipping_phone      = get_post_meta($order_id, '_shipping_phone', true);
+
+    // Copier les infos de livraison dans la facturation
+    update_post_meta($order_id, '_billing_first_name', $shipping_first_name);
+    update_post_meta($order_id, '_billing_last_name', $shipping_last_name);
+    update_post_meta($order_id, '_billing_address_1', $shipping_address_1);
+    update_post_meta($order_id, '_billing_address_2', $shipping_address_2);
+    update_post_meta($order_id, '_billing_city', $shipping_city);
+    update_post_meta($order_id, '_billing_postcode', $shipping_postcode);
+    update_post_meta($order_id, '_billing_country', $shipping_country);
+    update_post_meta($order_id, '_billing_state', $shipping_state);
+    update_post_meta($order_id, '_billing_phone', $shipping_phone);
+});
+
+// Ajouter un champ "Info sur l'expéditeur" sous les infos de facturation
+add_action('woocommerce_after_checkout_billing_form', function ($checkout) {
+    echo '<h3>Info sur l\'expéditeur</h3>';
+    
+    woocommerce_form_field('expediteur_nom', [
+        'type'        => 'text',
+        'class'       => ['form-row-wide'],
+        'label'       => 'Nom de l\'expéditeur',
+        'required'    => true,
+    ], $checkout->get_value('expediteur_nom'));
+
+    woocommerce_form_field('expediteur_telephone', [
+        'type'        => 'text',
+        'class'       => ['form-row-wide'],
+        'label'       => 'Téléphone de l\'expéditeur',
+        'required'    => false,
+    ], $checkout->get_value('expediteur_telephone'));
+});
+
+
+// Sauvegarder les infos de l'expéditeur dans la commande
+add_action('woocommerce_checkout_update_order_meta', function ($order_id) {
+    if (!empty($_POST['expediteur_nom'])) {
+        update_post_meta($order_id, '_expediteur_nom', sanitize_text_field($_POST['expediteur_nom']));
     }
-
-    list($latitude, $longitude, $city) = explode(',', sanitize_text_field($_COOKIE['geolocation']));
-
-    $city = strtolower(trim($city));
-
-    $city = stripslashes($city);
-
-    $villes = [
-        ['nom' => 'Antananarivo', 'codePostal' => '101', 'region' => 'Analamanga', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Antananarivo Madagascar', 'codePostal' => '101', 'region' => 'Analamanga', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Tananarive', 'codePostal' => '101', 'region' => 'Analamanga', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Diego Suarez', 'codePostal' => '201', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Diego-Suarez', 'codePostal' => '201', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Ambilobe', 'codePostal' => '204', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Antsiranana', 'codePostal' => '201', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Ambanja', 'codePostal' => '203', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'District d\'Ambanja', 'codePostal' => '203', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Nosy Be', 'codePostal' => '207', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Hell Ville', 'codePostal' => '207', 'region' => 'Diana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Andapa', 'codePostal' => '205', 'region' => 'SAVA', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'District d\'Andapa', 'codePostal' => '205', 'region' => 'SAVA', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Vohemar', 'codePostal' => '206', 'region' => 'SAVA', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Sambava', 'codePostal' => '208', 'region' => 'SAVA', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Tamatave', 'codePostal' => '501', 'region' => 'Atsinanana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Toamasina', 'codePostal' => '501', 'region' => 'Atsinanana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Antalaha', 'codePostal' => '207', 'region' => 'SAVA', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Mahajanga', 'codePostal' => '401', 'region' => 'Boeny', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Fianarantsoa', 'codePostal' => '301', 'region' => 'Haute Matsiatra', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Toliara', 'codePostal' => '601', 'region' => 'Atsimo-Andrefana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Tuléar', 'codePostal' => '601', 'region' => 'Atsimo-Andrefana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Antsirabe', 'codePostal' => '110', 'region' => 'Vakinankaratra', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Morondava', 'codePostal' => '619', 'region' => 'Menabe', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Manakara', 'codePostal' => '316', 'region' => 'Vatovavy-Fitovinany', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Ambositra', 'codePostal' => '306', 'region' => 'Amoron’i Mania', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Ambatondrazaka', 'codePostal' => '503', 'region' => 'Alaotra-Mangoro', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Farafangana', 'codePostal' => '309', 'region' => 'Atsimo-Atsinanana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Morombe', 'codePostal' => '618', 'region' => 'Atsimo-Andrefana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Mananjary', 'codePostal' => '317', 'region' => 'Vatovavy-Fitovinany', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Soavinandriana', 'codePostal' => '119', 'region' => 'Itasy', 'pays' => 'MG'],
-        ['nom' => 'Tsiroanomandidy', 'codePostal' => '118', 'region' => 'Bongolava', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Tôlanaro', 'codePostal' => '614', 'region' => 'Anosy', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Mahanoro', 'codePostal' => '510', 'region' => 'Atsinanana', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Fenoarivo Antsinanana', 'codePostal' => '509', 'region' => 'Analanjirofo', 'pays' => 'MG', 'paysName' => 'Madagascar'],
-        ['nom' => 'Fenoarivo Antsinanana', 'codePostal' => '509', 'region' => 'Analanjirofo', 'pays' => 'MG', 'paysName' => 'Madagascar']
-    ];
-
-
-    $ville = array_values(array_filter($villes, function ($v) use ($city) { return stripos($v['nom'], $city) !== false; }));
-
-    if (!empty($ville)) {
-        $ville = $ville[0];
-
-        $customer = WC()->customer;
-
-        $customer->set_shipping_city($ville['nom']);
-        $customer->set_shipping_postcode($ville['codePostal']);
-        $customer->set_shipping_state($ville['region']);
-        $customer->set_shipping_country($ville['pays']);
-        $customer->save();
-    }else{
-        $customer = WC()->customer;
-
-        $customer->set_shipping_city($ville['']);
-        $customer->set_shipping_postcode($ville['']);
-        $customer->set_shipping_state($ville['']);
-        $customer->set_shipping_country($ville['']);
-        $customer->save();
+    if (!empty($_POST['expediteur_telephone'])) {
+        update_post_meta($order_id, '_expediteur_telephone', sanitize_text_field($_POST['expediteur_telephone']));
     }
-}, 10, 0);
+});
 
-add_action('wp_footer', function () {
-    $customer = WC()->customer;
-    $shipping_city = $customer->get_shipping_city();
+// Ajouter "Info sur l'expéditeur" sur la facture
+add_filter('wpo_wcpdf_order_details_after_billing_address', function ($template_type, $order) {
+    $expediteur_nom = get_post_meta($order->get_id(), '_expediteur_nom', true);
+    $expediteur_telephone = get_post_meta($order->get_id(), '_expediteur_telephone', true);
 
-    if (!empty($shipping_city)) {
-        ?>
-        <script>
-            function disableShippingButton() {
-                var shippingButton = jQuery('.shipping-calculator-button');
-
-                shippingButton.on('click', function (e) {
-                    e.preventDefault();
-                });
-
-                shippingButton.css({
-                    'pointer-events': 'none',
-                    'opacity': '0.5',
-                    'cursor': 'not-allowed'
-                });
-            }
-
-            jQuery(document).ready(function ($) {
-                disableShippingButton();
-            });
-
-            jQuery(document.body).on('updated_cart_totals', function () {
-                disableShippingButton();
-            });
-        </script>
-        <?php
+    if ($expediteur_nom) {
+        echo '<p><strong>Expéditeur :</strong> ' . esc_html($expediteur_nom) . '</p>';
     }
-}, 20);
+    if ($expediteur_telephone) {
+        echo '<p><strong>Téléphone expéditeur :</strong> ' . esc_html($expediteur_telephone) . '</p>';
+    }
+}, 10, 2);
+
+
 

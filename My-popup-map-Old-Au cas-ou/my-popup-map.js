@@ -205,10 +205,10 @@ function initCustomMap(products) {
                 villeContainer.classList.add('ville_pays_dest1');
                 villeText.style = "padding: 0px; display: flex"
                 villeText.innerHTML = `
-                    <p style="text-wrap: nowrap; padding-left: 2px; padding : 0px; font-size: 1.1em;">
+                    <div style="text-wrap: nowrap; padding-left: 2px; padding : 0px; font-size: 1.1em; width : 100%">
                         <i class="fa fa-map-marker" aria-hidden="true"></i> 
                         Ville de livraison : ${allAddressCookie} (jusqu'à 35Km)
-                    </p>
+                    </div>
                     <div style="position: absolute; right: 10px; top: 0px;">
                         <a style="color: #0ce4e4; font-size: 14px;" href="#" onclick="resetMap('geolocation', '')">
                             <i class="fa fa-times"></i>

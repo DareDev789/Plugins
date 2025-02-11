@@ -417,11 +417,9 @@ add_action('woocommerce_add_to_cart', function () {
         return;
     }
 
-    // Récupérer la ville depuis le cookie
     list($latitude, $longitude, $city) = explode(',', sanitize_text_field($_COOKIE['geolocation']));
 
 
-    // Liste des villes disponibles
     $villes = [
         ['nom' => 'Antananarivo', 'codePostal' => '101', 'region' => 'Analamanga', 'pays' => 'MG', 'paysName' => 'Madagascar'],
         ['nom' => 'Tananarive', 'codePostal' => '101', 'region' => 'Analamanga', 'pays' => 'MG', 'paysName' => 'Madagascar'],
@@ -468,7 +466,306 @@ add_action('woocommerce_add_to_cart', function () {
         $customer->set_shipping_postcode($ville['codePostal']);
         $customer->set_shipping_state($ville['region']);
         $customer->set_shipping_country($ville['pays']);
+
+        $customer->set_billing_city($ville['nom']);
         $customer->save();
-        
+    }else{
+        $customer = WC()->customer;
+
+        $customer->set_shipping_city('');
+        $customer->set_shipping_postcode('');
+        $customer->set_shipping_state('');
+        $customer->set_shipping_country('');
+
+        $customer->set_billing_city('');
+        $customer->save();
     }
 }, 10, 0);
+
+
+// Forcer la facturation à être identique à la livraison sur la page de checkout
+add_filter('woocommerce_checkout_fields', function ($fields) {
+    if (is_checkout()) {
+        // Désactiver les champs de facturation
+        $fields['billing']['billing_first_name']['class'][] = 'hidden';
+        $fields['billing']['billing_last_name']['class'][] = 'hidden';
+        $fields['billing']['billing_address_1']['class'][] = 'hidden';
+        $fields['billing']['billing_address_2']['class'][] = 'hidden';
+        $fields['billing']['billing_city']['class'][] = 'hidden';
+        $fields['billing']['billing_postcode']['class'][] = 'hidden';
+        $fields['billing']['billing_country']['class'][] = 'hidden';
+        $fields['billing']['billing_state']['class'][] = 'hidden';
+        $fields['billing']['billing_phone']['class'][] = 'hidden';
+
+        // Ajouter une classe CSS pour cacher les champs dans le front-end
+        add_action('wp_head', function () {
+            echo '<style>.hidden { display: none !important; }</style>';
+        });
+    }
+    return $fields;
+});
+
+// Copier les infos de livraison dans la facturation AVANT validation du formulaire
+add_action('woocommerce_checkout_process', function () {
+
+    $_POST['billing_first_name'] = $_POST['shipping_first_name'];
+    $_POST['billing_last_name'] = $_POST['shipping_last_name'];
+    $_POST['billing_address_1'] = $_POST['shipping_address_1'];
+    $_POST['billing_address_2'] = $_POST['shipping_address_2'];
+    $_POST['billing_city'] = $_POST['shipping_city'];
+    $_POST['billing_postcode'] = $_POST['shipping_postcode'];
+    $_POST['billing_country'] = 'MG';
+    $_POST['billing_state'] = $_POST['shipping_state'];
+    $_POST['billing_phone'] = $_POST['shipping_phone'];
+});
+
+
+add_action('woocommerce_before_checkout_billing_form', function ($checkout) {
+    $countries = WC()->countries->get_countries();
+
+    woocommerce_form_field('expediteur_nom', [
+        'type'        => 'text',
+        'class'       => ['form-row-wide'],
+        'label'       => 'Nom de l\'expéditeur',
+        'required'    => true,
+    ], $checkout->get_value('expediteur_nom'));
+    
+
+    woocommerce_form_field('expediteur_pays', [
+        'type'       => 'select',
+        'class'      => ['form-row-wide', 'wc-enhanced-select', 'select2'],
+        'label'      => 'Pays',
+        'required'   => true,
+        'options'    => ['' => 'Sélectionner un pays'] + $countries,
+    ], $checkout->get_value('expediteur_pays'));
+
+    woocommerce_form_field('expediteur_adresse', [
+        'type'        => 'text',
+        'class'       => ['form-row-wide'],
+        'label'       => 'Numéro et nom de rue',
+        'required'    => true,
+    ], $checkout->get_value('expediteur_adresse'));
+
+    woocommerce_form_field('expediteur_ville', [
+        'type'        => 'text',
+        'class'       => ['form-row-wide'],
+        'label'       => 'Ville',
+        'required'    => true,
+    ], $checkout->get_value('expediteur_ville'));
+
+    woocommerce_form_field('expediteur_region', [
+        'type'        => 'text',
+        'class'       => ['form-row-wide'],
+        'label'       => 'Region / Département',
+        'required'    => true,
+    ], $checkout->get_value('expediteur_region'));
+
+    woocommerce_form_field('expediteur_postal', [
+        'type'        => 'text',
+        'class'       => ['form-row-wide'],
+        'label'       => 'Code Postal',
+        'required'    => true,
+    ], $checkout->get_value('expediteur_postal'));
+ 
+
+    woocommerce_form_field('expediteur_telephone', [
+        'type'        => 'text',
+        'class'       => ['form-row-wide'],
+        'label'       => 'Téléphone de l\'expéditeur',
+        'required'    => true,
+    ], $checkout->get_value('expediteur_telephone'));
+});
+
+
+
+add_action('woocommerce_checkout_update_order_meta', function ($order_id) {
+
+    if (!empty($_POST['expediteur_ville'])) {
+        update_post_meta($order_id, '_billing_city', sanitize_text_field($_POST['expediteur_ville']));
+    }
+
+    if (!empty($_POST['expediteur_postal'])) {
+        update_post_meta($order_id, '_billing_postcode', sanitize_text_field($_POST['expediteur_postal']));
+    }
+
+    if (!empty($_POST['expediteur_adresse'])) {
+        update_post_meta($order_id, '_billing_address_1', sanitize_text_field($_POST['expediteur_adresse']));
+    }
+
+    if (!empty($_POST['expediteur_nom'])) {
+        update_post_meta($order_id, '_billing_first_name', sanitize_text_field($_POST['expediteur_nom']));
+        update_post_meta($order_id, '_billing_last_name', sanitize_text_field(''));
+
+    }
+    if (!empty($_POST['expediteur_telephone'])) {
+        update_post_meta($order_id, '_billing_phone', sanitize_text_field($_POST['expediteur_telephone']));
+    }
+    if (!empty($_POST['expediteur_pays'])) {
+        update_post_meta($order_id, '_billing_country', sanitize_text_field($_POST['expediteur_pays']));
+    }
+
+    if (!empty($_POST['expediteur_region'])) {
+        update_post_meta($order_id, '_billing_state', sanitize_text_field($_POST['expediteur_region']));
+    }
+
+});
+
+add_action('woocommerce_checkout_update_order_meta', function ($order_id) {
+    if (is_user_logged_in()) {
+        $user_id = get_current_user_id();
+
+        // Liste des champs personnalisés
+        $fields = [
+            'expediteur_nom',
+            'expediteur_pays',
+            'expediteur_adresse',
+            'expediteur_ville',
+            'expediteur_region',
+            'expediteur_postal',
+            'expediteur_telephone'
+        ];
+
+        foreach ($fields as $field) {
+            if (!empty($_POST[$field])) {
+                update_user_meta($user_id, $field, sanitize_text_field($_POST[$field]));
+            }
+        }
+    } else {
+        // Sauvegarde dans les cookies pour les utilisateurs non connectés
+        foreach ($_POST as $key => $value) {
+            if (strpos($key, 'expediteur_') === 0) {
+                setcookie($key, sanitize_text_field($value), time() + 3600 * 24 * 30, '/'); // Expire après 30 jours
+            }
+        }
+    }
+});
+
+
+
+// add_filter('woocommerce_email_order_meta_fields', function ($fields, $sent_to_admin, $order) {
+//     return [
+//         'expediteur_nom' => [
+//             'label' => 'Nom de l\'expéditeur',
+//             'value' => get_post_meta($order->get_id(), '_expediteur_nom', true),
+//         ],
+//         'expediteur_telephone' => [
+//             'label' => 'Téléphone de l\'expéditeur',
+//             'value' => get_post_meta($order->get_id(), '_expediteur_telephone', true),
+//         ],
+//         'billing_country' => [
+//             'label' => 'Pays de l\'expéditeur',
+//             'value' => WC()->countries->countries[get_post_meta($order->get_id(), '_expediteur_pays', true)] 
+//                       ?? get_post_meta($order->get_id(), '_expediteur_pays', true),
+//         ],
+//         'expediteur_ville' => [
+//             'label' => 'Ville de l\'expéditeur',
+//             'value' => get_post_meta($order->get_id(), '_expediteur_ville', true),
+//         ],
+//         'expediteur_postal' => [
+//             'label' => 'Code Postal de l\'expéditeur',
+//             'value' => get_post_meta($order->get_id(), '_expediteur_postal', true),
+//         ],
+//         'billing_adress' => [
+//             'label' => 'Adresse de l\'expéditeur',
+//             'value' => get_post_meta($order->get_id(), '_expediteur_adresse', true),
+//         ],
+//         'billing_email' => [
+//             'label' => 'Email de l\'expéditeur',
+//             'value' => $order->get_billing_email(),
+//         ],
+//     ];
+// }, 10, 3);
+
+
+
+// // Filtre pour afficher les informations de l'expéditeur dans le PDF
+// add_filter('wpo_wcpdf_billing_address', function ($address, $order) {
+//     $expediteur_nom = get_post_meta($order->get_id(), '_expediteur_nom', true);
+//     $expediteur_telephone = get_post_meta($order->get_id(), '_expediteur_telephone', true);
+//     $expediteur_pays = get_post_meta($order->get_id(), '_expediteur_pays', true);
+//     $expediteur_ville = get_post_meta($order->get_id(), '_expediteur_ville', true);
+//     $expediteur_postal = get_post_meta($order->get_id(), '_expediteur_postal', true);
+//     $expediteur_adresse = get_post_meta($order->get_id(), '_expediteur_adresse', true);
+//     $billing_email = $order->get_billing_email();
+
+//     // Récupération du nom du pays
+//     $pays_name = WC()->countries->countries[$expediteur_pays] ?? $expediteur_pays;
+
+//     // Construction de la nouvelle adresse
+//     $new_address = "<h3>Infos de l'expéditeur:</h3>";
+    
+//     if (!empty($expediteur_nom)) {
+//         $new_address .= "<strong>Nom :</strong> " . esc_html($expediteur_nom) . "<br>";
+//     }
+//     if (!empty($expediteur_telephone)) {
+//         $new_address .= "<strong>Téléphone :</strong> " . esc_html($expediteur_telephone) . "<br>";
+//     }
+//     if (!empty($expediteur_pays)) {
+//         $new_address .= "<strong>Pays :</strong> " . esc_html($pays_name) . "<br>";
+//     }
+//     if (!empty($expediteur_ville)) {
+//         $new_address .= "<strong>Ville :</strong> " . esc_html($expediteur_ville) . "<br>";
+//     }
+//     if (!empty($expediteur_postal)) {
+//         $new_address .= "<strong>Code Postal :</strong> " . esc_html($expediteur_postal) . "<br>";
+//     }
+//     if (!empty($expediteur_adresse)) {
+//         $new_address .= "<strong>Adresse :</strong> " . esc_html($expediteur_adresse) . "<br>";
+//     }
+//     if (!empty($billing_email)) {
+//         $new_address .= "<strong>Email :</strong> " . esc_html($billing_email) . "<br>";
+//     }
+
+//     return $new_address;
+// }, 10, 2);
+
+
+
+// // Action pour afficher les informations de l'expéditeur dans le tableau de bord de commande
+// add_action('woocommerce_admin_order_data_after_billing_address', function ($order) {
+//     $expediteur_nom = get_post_meta($order->get_id(), '_expediteur_nom', true);
+//     $expediteur_telephone = get_post_meta($order->get_id(), '_expediteur_telephone', true);
+//     $expediteur_pays = get_post_meta($order->get_id(), '_expediteur_pays', true);
+//     $expediteur_ville = get_post_meta($order->get_id(), '_expediteur_ville', true);
+//     $expediteur_postal = get_post_meta($order->get_id(), '_expediteur_postal', true);
+//     $expediteur_adresse = get_post_meta($order->get_id(), '_expediteur_adresse', true);
+//     $billing_email = $order->get_billing_email();
+
+//     echo '<div class="address">';
+//     echo '<h3>Infos de l\'expéditeur:</h3>';
+//     echo '<p><strong>Nom de l\'expéditeur:</strong> ' . esc_html($expediteur_nom) . '</p>';
+//     if (!empty($expediteur_telephone)) {
+//         echo '<p><strong>Téléphone:</strong> ' . esc_html($expediteur_telephone) . '</p>';
+//     }
+//     if (!empty($expediteur_pays)) {
+//         $pays_name = WC()->countries->countries[$expediteur_pays] ?? $expediteur_pays;
+//         echo '<p><strong>Pays:</strong> ' . esc_html($pays_name) . '</p>';
+//     }
+//     echo '<p><strong>Ville de l\'expéditeur:</strong> ' . esc_html($expediteur_ville) . '</p>';
+//     echo '<p><strong>Code postal de l\'expéditeur:</strong> ' . esc_html($expediteur_postal) . '</p>';
+//     echo '<p><strong>Adresse de l\'expéditeur:</strong> ' . esc_html($expediteur_adresse) . '</p>';
+//     echo '<p><strong>Email:</strong> ' . esc_html($billing_email) . '</p>';
+//     echo '</div>';
+// }, 10, 1);
+
+
+// add_filter('woocommerce_email_customer_details', function ($fields) {
+//     return [];
+// }, 20, 3);
+
+//Cacher les champs de facturation sur la page checkout
+// add_filter('woocommerce_checkout_fields', function ($fields) {
+//     if (is_checkout()) {
+//         // Supprime les champs de facturation
+//         unset($fields['billing']);
+//     }
+//     return $fields;
+// });
+
+
+
+
+
+
+
+
