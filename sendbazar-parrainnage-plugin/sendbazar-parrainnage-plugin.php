@@ -291,14 +291,11 @@ function credit_parrain_after_order($order_id)
         return;
     }
 
-    // Récupérer et convertir le crédit existant en entier
     $current_credits = (int) get_user_meta($parrain_id, 'parrainage_credits', true);
     $new_credits = $current_credits + 5;
 
-    // Mettre à jour le crédit de parrainage
     update_user_meta($parrain_id, 'parrainage_credits', $new_credits);
 
-    // Récupérer l'email du parrain
     $parrain_email = $user_exists->user_email;
 
     if (!empty($parrain_email)) {
@@ -319,13 +316,13 @@ add_action('woocommerce_order_status_completed', 'credit_parrain_after_order');
 function add_parrainage_admin_page()
 {
     add_menu_page(
-        'Parrainage Plugin', // Titre de la page
-        'Parrainage', // Nom du menu
-        'manage_options', // Capability
-        'parrainage-plugin', // Slug
-        'display_parrainage_admin_page', // Fonction d'affichage
-        'dashicons-groups', // Icône
-        25 // Position
+        'Parrainage Plugin',
+        'Parrainage',
+        'manage_options',
+        'parrainage-plugin',
+        'display_parrainage_admin_page',
+        'dashicons-groups',
+        25
     );
 }
 add_action('admin_menu', 'add_parrainage_admin_page');

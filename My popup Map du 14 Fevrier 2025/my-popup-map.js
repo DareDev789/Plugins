@@ -65,7 +65,7 @@ if (geolocation) {
     paysCookie = geolocationParts[3] || '';
     allAddressCookie = `${addressCookie}, ${paysCookie}`;
 }
-
+        
 var map;
 var infoWindows = [];
 var countryMarkers = [];
@@ -77,16 +77,17 @@ function initCustomMap(products) {
     map = new google.maps.Map(document.getElementById('geolocation-map'), {
         zoom: 2.8,
         center: { lat: -8.0, lng: 32.0 },
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
+        mapTypeControl: false, 
+        streetViewControl: false, 
+        fullscreenControl: false, 
     });
+    console.log(products);
 
-    Object.keys(products).forEach(function (country, i_country) {
+    Object.keys(products).forEach(function(country, i_country) {
         let cities = products[country];
-        let countryLatLng = capitals[country] || {
-            lat: parseFloat(cities[0][0].latitude),
-            lng: parseFloat(cities[0][0].longitude)
+        let countryLatLng = capitals[country] || { 
+            lat: parseFloat(cities[0][0].latitude), 
+            lng: parseFloat(cities[0][0].longitude) 
         };
 
         let countryMarker = new google.maps.Marker({
@@ -97,21 +98,21 @@ function initCustomMap(products) {
         });
 
         let countryInfoWindow = new google.maps.InfoWindow({
-            content: '<strong id="countryInfoWindowContent' + i_country + '">' + country + '</strong>'
+            content: '<strong id="countryInfoWindowContent' + i_country +'">' + country + '</strong>'
         });
 
         countryInfoWindow.open(map, countryMarker);
 
-        google.maps.event.addListener(countryInfoWindow, 'domready', function () {
+        google.maps.event.addListener(countryInfoWindow, 'domready', function() {
             let infoWindowContentElement = document.getElementById('countryInfoWindowContent' + i_country);
             if (infoWindowContentElement) {
-                infoWindowContentElement.addEventListener('click', function () {
+                infoWindowContentElement.addEventListener('click', function() {
                     countryClickHandler(countryMarker, cities);
                 });
             }
         });
 
-        google.maps.event.addListener(countryMarker, 'click', function () {
+        google.maps.event.addListener(countryMarker, 'click', function() {
             countryClickHandler(countryMarker, cities);
         });
 
@@ -119,7 +120,7 @@ function initCustomMap(products) {
         infoWindows.push(countryInfoWindow);
     });
 
-    map.addListener('zoom_changed', function () {
+    map.addListener('zoom_changed', function() {
         let zoomLevel = map.getZoom();
         setMarkersVisibility(cityMarkers, zoomLevel > 5 && zoomLevel <= 12);
         setMarkersVisibility(countryMarkers, zoomLevel <= 5);
@@ -205,16 +206,15 @@ function initCustomMap(products) {
                 villeContainer.classList.add('ville_pays_dest1');
                 villeText.style = "padding: 0px; display: flex"
                 villeText.innerHTML = `
-                    <div style="text-wrap: nowrap; padding-left: 2px; padding : 0px; font-size: 1em; width : 100%; relative">
+                    <div style="text-wrap: nowrap; padding-left: 2px; padding : 0px; font-size: 1.1em; width : 100%">
                         <i class="fa fa-map-marker" aria-hidden="true"></i> 
                         Ville de livraison : ${allAddressCookie} (jusqu'à 35Km)
-                        <div style="position: absolute; right: 10px; top: 0px;">
-                            <a style="color: #0ce4e4; font-size: 14px;" href="#" onclick="resetMap('geolocation', '')">
-                                <i class="fa fa-times"></i>
-                            </a>
-                        </div>
                     </div>
-                    
+                    <div style="position: absolute; right: 10px; top: 0px;">
+                        <a style="color: #0ce4e4; font-size: 14px;" href="#" onclick="resetMap('geolocation', '')">
+                            <i class="fa fa-times"></i>
+                        </a>
+                    </div>
                 `;
 
             } else {
@@ -276,7 +276,7 @@ function initCustomMap(products) {
     window.resetMap = resetMap;
 })();
 
-jQuery(document).ready(function ($) {
+jQuery(document).ready(function($) {
     function getCookie(name) {
         let cookieArr = document.cookie.split("; ");
         for (let i = 0; i < cookieArr.length; i++) {
@@ -288,71 +288,71 @@ jQuery(document).ready(function ($) {
         return null;
     }
 
-    function open_popup_cat() {
+    function open_popup_cat(){
         $('#popup-categories').fadeIn();
         $('.modal-content').fadeIn();
     }
 
-    function close_popup_cat() {
+    function close_popup_cat(){
         $('#popup-categories').fadeOut();
         $('.modal-content').fadeOut();
     }
 
-    function open_Change_Cat() {
+    function open_Change_Cat(){
         $('#Change_Cat').fadeIn();
     }
 
-    function Close_Change_Cat() {
+    function Close_Change_Cat(){
         $('#Change_Cat').fadeOut();
     }
 
-    $('#Change_Cat').click(function () {
-        if (!geolocation) {
+    $('#Change_Cat').click(function() {
+        if(!geolocation){
             openMap();
-        } else {
+        }else{
             open_popup_cat();
             Close_Change_Cat();
         }
     });
 
-    if (!window.location.pathname.includes('espace-vendeurs') && !window.location.pathname.includes('mon-compte') && !window.location.pathname.includes('tableau-de-bord')) {
+    if(!window.location.pathname.includes('espace-vendeurs') && !window.location.pathname.includes('mon-compte') && !window.location.pathname.includes('tableau-de-bord')){
         $('#Change_Cat').fadeIn();
-        if (!geolocation) {
+        if(!geolocation){
             openMap();
-        } else {
+        }else{
             if (window.location.pathname.includes('produits') && !getCookie('categorie_select')) {
                 open_popup_cat();
                 Close_Change_Cat();
             }
         }
     }
-
-    $('.category-item').click(function () {
+    
+    $('.category-item').click(function() {
         let categorySlug = $(this).data('slug');
-        if (categorySlug === 'TousProduits') {
+        if(categorySlug === 'TousProduits'){
             document.cookie = "categorie_select=TousProduits; path=/; SameSite=Lax; Secure;";
             window.location.href = '/produits/';
-        } else {
+        }else{
             document.cookie = "categorie_select=" + categorySlug + "; path=/; SameSite=Lax; Secure;";
             window.location.href = '/categorie-produit/' + categorySlug;
         }
     });
 
-    $('#popup-categories').click(function (event) {
+    $('#popup-categories').click(function(event) {
         close_popup_cat();
         open_Change_Cat();
     });
-    $('#FermerCat').click(function (event) {
+    $('#FermerCat').click(function(event) {
         close_popup_cat();
         open_Change_Cat();
     });
-
+    
 });
 
 function getCookie1(name) {
     let cookieArr = document.cookie.split(";");
 
-    for (let i = 0; i < cookieArr.length; i++) {
+    for(let i = 0; i < cookieArr.length; i++) {
         let cookie = cookieArr[i].trim();
 
         if (cookie.indexOf(name + "=") === 0) {
@@ -389,22 +389,22 @@ function redirectOrReload() {
 
 document.addEventListener('DOMContentLoaded', function () {
     const links = document.querySelectorAll('a');
-
+    
     links.forEach(link => {
         link.addEventListener('click', function (event) {
             const clickedUrl = link.href;
-
+            
             const targetUrl = window.location.origin + '/produits/';
             const targetUrl1 = window.location.origin + '/produit/';
             const targetUrl2 = window.location.origin + '/categorie-produit/';
             const targetUrl3 = window.location.origin + '/pharmacies/';
-
+            
             if (clickedUrl.startsWith(targetUrl) || clickedUrl.startsWith(targetUrl1) || clickedUrl.startsWith(targetUrl2) || clickedUrl.startsWith(targetUrl3)) {
                 if (!geolocation) {
                     event.preventDefault();
                     document.cookie = "direction=" + clickedUrl + "; path=/";
                     window.stop();
-
+                    
                     openMap(event);
                 }
             }
@@ -425,7 +425,7 @@ function addProductMarkers(product, address) {
     });
 
 
-    google.maps.event.addListener(productMarker, 'click', function () {
+    google.maps.event.addListener(productMarker, 'click', function() {
         productClickHandler(productMarker, productInfoWindow, product, address);
     });
 
@@ -461,7 +461,7 @@ function countryClickHandler(countryMarker, cities) {
     for (let i = 0; i < infoWindows.length; i++) {
         infoWindows[i].close();
     }
-
+    
     map.setZoom(5);
     map.setCenter(countryMarker.getPosition());
 
@@ -494,7 +494,7 @@ function addCityMarkers(city, addresses) {
                 content: '<strong>' + address + '</strong>'
             });
 
-            google.maps.event.addListener(addressMarker, 'click', function () {
+            google.maps.event.addListener(addressMarker, 'click', function() {
                 addressClickHandler(addressMarker, addressInfoWindow, address, addresses[address]);
             });
             cityMarkers.push(addressMarker);
@@ -512,12 +512,12 @@ function addressClickHandler(addressMarker, addressInfoWindow, address, products
 
     clearMarkers(productMarkers);
 
-    products.forEach(function (product) {
+    products.forEach(function(product) {
         addProductMarkers(product, address);
     });
 }
 
-function AllowGeolocation(city, latitude, longitude) {
+function AllowGeolocation(city, latitude, longitude){
     if (city && latitude && longitude) {
         closeMap()
         var geolocation = document.cookie.split('; ').find(row => row.startsWith('geolocation='));
@@ -556,9 +556,9 @@ function AllowGeolocation(city, latitude, longitude) {
                         console.error('Erreur lors de la vidange du panier:', error);
                         openMap();
                     });
-            } else {
+            }else{
                 openMap();
-            }
+            } 
         });
     }
 }

@@ -165,7 +165,7 @@ $orders = get_posts($args);
             .then(data => {
                 alert(data.message);
                 if (data.success) {
-                    location.reload(); // Rafraîchit la page pour afficher l'état "En attente"
+                    location.reload();
                 }
             })
             .catch(error => console.error("Erreur :", error))
